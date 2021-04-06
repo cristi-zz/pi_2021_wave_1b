@@ -36,5 +36,5 @@ Spre deosebire de tutorialul de git, vom lucra direct in master, fara sa mai fac
 despre *rebase*. NU il recomand a fi folosit, decat cu atentie.
 
 Denisa Muresan a modificat acest fisier.
-
+Risa Alexandru test.
 
