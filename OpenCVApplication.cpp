@@ -3,6 +3,8 @@
 
 #include "stdafx.h"
 #include "common.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 
 void testOpenImage()
@@ -120,6 +122,15 @@ Mat_<Vec3b> twoDDeconstruction(Mat_<Vec3b> src, int level) {
 	return dst;
 }
 
+float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
+	float mean = 0.0f;
+
+	for (int i = 0; i < originalImg.rows; i++)
+		for (int j = 0; j < originalImg.cols; j++)
+			mean += abs(originalImg(i,j) - reconstructedImg(i, j));
+
+	return (float)mean / (originalImg.rows * originalImg.cols);
+}
 
 int main()
 {
