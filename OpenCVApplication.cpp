@@ -66,6 +66,92 @@ void testColor2Gray()
 	}
 }
 
+std::vector<int> computeLowVector(std::vector<int> input) {
+	std::vector<int> vector_low(input.size() / 2);
+
+	for (int i = 0; i < input.size() / 2; i++)
+		vector_low[i] = (input[i * 2] + input[i * 2 + 1]) / 2;
+
+	return vector_low;
+}
+
+std::vector<int> computeHighVector(std::vector<int> input) {
+	std::vector<int> vector_high(input.size() / 2);
+
+	for (int i = 0; i < input.size() / 2; i++)
+		vector_high[i] = (input[i * 2] - input[i * 2 + 1]) / 2;
+
+	return vector_high;
+}
+
+void oneDConstruction(std::vector<int> input) {
+
+	std::vector<int> vector_low = computeLowVector(input);
+	std::vector<int> vector_high = computeHighVector(input);
+
+	for (int i = 0; i < input.size(); i++)
+		printf("%d ", input[i]);
+	printf("\n");
+
+	for (int i = 0; i < input.size()/2; i++)
+		printf("%d ", vector_low[i]);
+
+	for (int i = 0; i < input.size() / 2; i++)
+		printf("%d ", vector_high[i]);
+
+}
+
+std::vector<int> computeHighUpSample(std::vector<int> input) {
+	std::vector<int> high_upSample(input.size()*2);
+	std::vector<int> h{ 1,-1 };
+
+	for (int i = 0; i < input.size() * 2; i++)
+		high_upSample[i] = input[i / 2] * h[i % 2];
+
+	return high_upSample;
+}
+
+std::vector<int> computeLowUpSample(std::vector<int> input) {
+	std::vector<int> low_upSample(input.size() * 2);
+	std::vector<int> h{ 1,-1 };
+
+	for (int i = 0; i < input.size() * 2; i++)
+		low_upSample[i] = input[i / 2];
+
+	return low_upSample;
+}
+
+void oneDDeconstruction(std::vector<int> vector_low, std::vector<int> vector_high) {
+
+	std::vector<int> low_upSample = computeLowUpSample(vector_low);
+	std::vector<int> high_upSample = computeHighUpSample(vector_high);
+	std::vector<int> upsample_signal(low_upSample.size());
+
+	for (int i = 0; i < upsample_signal.size(); i++)
+		upsample_signal[i] = high_upSample[i] + low_upSample[i];
+
+	for (int i = 0; i < vector_low.size(); i++)
+		printf("%d ", vector_low[i]);
+
+	for (int i = 0; i < vector_high.size(); i++)
+		printf("%d ", vector_high[i]);
+
+	printf("\n");
+
+	for (int i = 0; i < low_upSample.size(); i++)
+		printf("%d ", low_upSample[i]);
+
+	printf("\n");
+
+	for (int i = 0; i < high_upSample.size(); i++)
+		printf("%d ", high_upSample[i]);
+
+	printf("\n");
+
+	for (int i = 0; i < upsample_signal.size(); i++)
+		printf("%d ", upsample_signal[i]);
+}
+
 Mat_<Vec3b> twoDConstruction(Mat_<Vec3b> src, int level) {
 	int height = src.rows;
 	int width = src.cols;
@@ -145,6 +231,8 @@ int main()
 		printf(" 3 - Color to Gray\n");
 		printf(" 4 - 2D Construction\n");
 		printf(" 5 - 2D Deconstruction\n");
+		printf(" 6 - 1D Construction\n");
+		printf(" 7 - 1D Deconstruction\n");
 		printf(" 0 - Exit\n\n");
 		printf("Option: ");
 		scanf("%d",&op);
@@ -197,7 +285,17 @@ int main()
 				}
 				break;
 			}
-				
+			case 6:{
+				oneDConstruction({ 9, 7, 3, 5, 6, 10, 2, 6 });
+				break;
+			}
+			case 7: {
+				std::vector<int> vector_low = computeLowVector({ 9, 7, 3, 5, 6, 10, 2, 6 });
+				std::vector<int> vector_high = computeHighVector({ 9, 7, 3, 5, 6, 10, 2, 6 });
+
+				oneDDeconstruction(vector_low, vector_high);
+				break;
+			}
 		}
 	}
 	while (op!=0);
