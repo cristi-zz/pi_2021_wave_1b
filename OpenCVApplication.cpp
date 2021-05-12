@@ -101,13 +101,8 @@ void oneDConstruction(std::vector<int> input) {
 
 	for (int i = 0; i < input.size() / 2; i++)
 		printf("%d ", vector_high[i]);
-<<<<<<< HEAD
-	system("pause");
-=======
-
 	system("pause");
 
->>>>>>> 0cdc7730188a6f10abc2f6259118a7e77fbe7a3c
 }
 
 //************ 1D Decosntruction
@@ -161,10 +156,8 @@ void oneDDeconstruction(std::vector<int> vector_low, std::vector<int> vector_hig
 
 	for (int i = 0; i < upsample_signal.size(); i++)
 		printf("%d ", upsample_signal[i]);
-<<<<<<< HEAD
-=======
 
->>>>>>> 0cdc7730188a6f10abc2f6259118a7e77fbe7a3c
+	system("pause");
 
 }
 
@@ -477,12 +470,10 @@ float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
 		for (int j = 0; j < originalImg.cols; j++)
 			mean += abs(originalImg(i, j) - reconstructedImg(i, j));
 
-<<<<<<< HEAD
-=======
+
 	return (float)mean / (originalImg.rows * originalImg.cols);
 }
 
->>>>>>> 0cdc7730188a6f10abc2f6259118a7e77fbe7a3c
 int main()
 {
 	int op;
