@@ -66,6 +66,8 @@ void testColor2Gray()
 	}
 }
 
+//************ 1D Construction
+
 std::vector<int> computeLowVector(std::vector<int> input) {
 	std::vector<int> vector_low(input.size() / 2);
 
@@ -99,8 +101,16 @@ void oneDConstruction(std::vector<int> input) {
 
 	for (int i = 0; i < input.size() / 2; i++)
 		printf("%d ", vector_high[i]);
+<<<<<<< HEAD
 	system("pause");
+=======
+
+	system("pause");
+
+>>>>>>> 0cdc7730188a6f10abc2f6259118a7e77fbe7a3c
 }
+
+//************ 1D Decosntruction
 
 std::vector<int> computeHighUpSample(std::vector<int> input) {
 	std::vector<int> high_upSample(input.size()*2);
@@ -151,9 +161,14 @@ void oneDDeconstruction(std::vector<int> vector_low, std::vector<int> vector_hig
 
 	for (int i = 0; i < upsample_signal.size(); i++)
 		printf("%d ", upsample_signal[i]);
-	system("pause");
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0cdc7730188a6f10abc2f6259118a7e77fbe7a3c
+
 }
 
+/*
 Mat_<Vec3b> twoDConstruction(Mat_<Vec3b> src, int level) {
 	int height = src.rows;
 	int width = src.cols;
@@ -209,17 +224,9 @@ Mat_<Vec3b> twoDDeconstruction(Mat_<Vec3b> src, int level) {
 	}
 	return dst;
 }
+*/
 
-float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
-	float mean = 0.0f;
-
-	for (int i = 0; i < originalImg.rows; i++)
-		for (int j = 0; j < originalImg.cols; j++)
-			mean += abs(originalImg(i,j) - reconstructedImg(i, j));
-
-	return (float)mean / (originalImg.rows * originalImg.cols);
-}
-
+//************ 2D Decosntruction
 
 Mat_<int> imageLL(Mat_<int> dstLow) {
 
@@ -238,8 +245,6 @@ Mat_<int> imageLL(Mat_<int> dstLow) {
 	}
 	return dstLL;
 }
-
-
 
 Mat_<int> imageLH(Mat_<int> dstLow) {
 
@@ -276,8 +281,6 @@ Mat_<int> imageHL(Mat_<int> dstHigh) {
 	return dstHL;
 }
 
-
-
 Mat_<int> imageHH(Mat_<int> dstHigh) {
 	//HH
 	Mat_<int> dstHH(dstHigh.rows / 2, dstHigh.cols);
@@ -312,6 +315,7 @@ Mat_<int> imageLow(Mat_<int>src) {
 	}
 	return dstLow;
 }
+
 Mat_<int> imageHigh(Mat_<int>src) {
 
 	//high
@@ -330,66 +334,155 @@ Mat_<int> imageHigh(Mat_<int>src) {
 	return dstHigh;
 }
 
-void twoDD(int level) {
-	char fname[MAX_PATH];
-	openFileDlg(fname);
-	Mat_<int> src;
-	src = imread(fname, IMREAD_GRAYSCALE);
+void twoDDeconstruct(Mat_<int> src, Mat_<int> &dstLL, Mat_<int> &dstLH, Mat_<int> &dstHL, Mat_<int> &dstHH){
+
 	Mat_<int> dstLow(src.rows, src.cols / 2);
 	Mat_<int> dstHigh(src.rows, src.cols / 2);
 
-	std::vector<int> rowAux(src.rows);
-	std::vector<int> colAux(src.cols);
+	dstLow = imageLow(src);
+	dstHigh = imageHigh(src);
 
-	int height = src.rows;
-	int width = src.cols;
+	dstLL = imageLL(dstLow);
+	dstLH = imageLH(dstLow);
+	dstHL = imageHL(dstHigh);
+	dstHH = imageHH(dstHigh);
 
-	printf("%d %d\n", height, width);
+}
 
-	while (level) {
+void twoDDeconstructShow() {
 
+	char fname[MAX_PATH];
+	if (openFileDlg(fname)) {
+		Mat_<int> src;
+		src = imread(fname, IMREAD_GRAYSCALE);
+		imshow("src", (Mat_<uchar>) src);
 
-		//low
+		Mat_<int> dstLow(src.rows, src.cols / 2);
+		Mat_<int> dstHigh(src.rows, src.cols / 2);
+
+		int height = src.rows;
+		int width = src.cols;
+
+		printf("%d %d\n", height, width);
+
+		// we compute the lowImage and highImage just for the purpose of displaying them
+
+		//lowImage
 		dstLow = imageLow(src);
 		imshow("L", (Mat_<uchar>) dstLow);
 		resizeWindow("L", src.rows, src.cols);
 
-		//high
+		//highImage
 		dstHigh = imageHigh(src);
 		imshow("H", (Mat_<uchar>) dstHigh);
 		resizeWindow("H", src.rows, src.cols);
 
-		//LL
+
 		Mat_<int> dstLL(height / 2, width / 2);
-		dstLL = imageLL(dstLow);
+		Mat_<int> dstLH(height / 2, width / 2);
+		Mat_<int> dstHL(height / 2, width / 2);
+		Mat_<int> dstHH(height / 2, width / 2);
+
+		twoDDeconstruct(src, dstLL, dstLH, dstHL, dstHH);
+
 		imshow("LL", (Mat_<uchar>) dstLL);
 		resizeWindow("LL", height, width);
 
-		//LH
-		Mat_<int> dstLH(height / 2, width / 2);
-		dstLH = imageLH(dstLow);
 		imshow("LH", (Mat_<uchar>) dstLH);
 		resizeWindow("LH", height, width);
 
-		//HL
-		Mat_<int> dstHL(height / 2, width / 2);
-		dstHL = imageHL(dstHigh);
 		imshow("HL", (Mat_<uchar>) dstHL);
 		resizeWindow("HL", height, width);
 
-		//HH
-		Mat_<int> dstHH(height / 2, width / 2);
-		dstHH = imageHH(dstHigh);
 		imshow("HH", (Mat_<uchar>) dstHH);
 		resizeWindow("HH", height, width);
 
+		waitKey(0);
+	}
+}
+
+//************ 2D Decosntruction Recursive
+
+std::vector<Mat_<int>> twoDDeconstructRecursive(Mat_<int> src, int level) {
+
+	std::vector<Mat_<int>> dest;
+
+	Mat_<int> startingImg = src.clone();
+
+	while (level) {
+		Mat_<int> dstLL(startingImg.rows / 2, startingImg.cols / 2);
+		Mat_<int> dstLH(startingImg.rows / 2, startingImg.cols / 2);
+		Mat_<int> dstHL(startingImg.rows / 2, startingImg.cols / 2);
+		Mat_<int> dstHH(startingImg.rows / 2, startingImg.cols / 2);
+
+		twoDDeconstruct(startingImg, dstLL, dstLH, dstHL, dstHH);
+
+		dest.push_back(dstHH);
+		dest.push_back(dstLH);
+		dest.push_back(dstHL);
+
+		startingImg = dstLL.clone();
 		level--;
 	}
 
-	imshow("src", (Mat_<uchar>) src);
-	waitKey(0);
+	return dest;
 }
 
+void twoDDeconstructRecursiveShow() {
+
+	char fname[MAX_PATH];
+	if (openFileDlg(fname)) {
+		Mat_<int> src=imread(fname, IMREAD_GRAYSCALE);
+		int height = src.rows;
+		int width = src.cols;
+
+		int level = 0;
+		printf("Level=");
+		scanf("%d", &level);
+
+		imshow("src", (Mat_<uchar>) src);
+		
+		std::vector<Mat_<int>> dest=twoDDeconstructRecursive(src, level);
+
+		level = 1;
+		for (int i = 0; i < dest.size()-1; i+=3) {
+			
+			String hh = "HH" + std::to_string(level);
+			imshow(hh, (Mat_<uchar>) dest[i]);
+			resizeWindow(hh, height, width);
+
+			String hl = "HL" + std::to_string(level);
+			imshow(hl, (Mat_<uchar>) dest[i + 1]);
+			resizeWindow(hl, height, width);
+
+			String lh = "LH" + std::to_string(level);
+			imshow(lh, (Mat_<uchar>) dest[i + 2]);
+			resizeWindow(lh, height, width);
+
+			level++;
+		}
+
+		imshow("LL", (Mat_<uchar>) dest[dest.size()-1]);
+		resizeWindow("LL", height, width);
+
+		waitKey(0);
+	}
+}
+//************ MAE
+
+float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
+	float mean = 0.0f;
+
+	for (int i = 0; i < originalImg.rows; i++)
+		for (int j = 0; j < originalImg.cols; j++)
+			mean += abs(originalImg(i, j) - reconstructedImg(i, j));
+
+<<<<<<< HEAD
+=======
+	return (float)mean / (originalImg.rows * originalImg.cols);
+}
+
+>>>>>>> 0cdc7730188a6f10abc2f6259118a7e77fbe7a3c
 int main()
 {
 	int op;
@@ -401,11 +494,12 @@ int main()
 		printf(" 1 - Basic image opening...\n");
 		printf(" 2 - Open BMP images from folder\n");
 		printf(" 3 - Color to Gray\n");
-		printf(" 4 - 2D Construction\n");
-		printf(" 5 - 2D Deconstruction\n");
+		/*printf(" 4 - 2D Construction\n");
+		printf(" 5 - 2D Deconstruction\n");*/
 		printf(" 6 - 1D Construction\n");
 		printf(" 7 - 1D Deconstruction\n");
 		printf(" 8 - 2D Deconstruction\n");
+		printf(" 9 - 2D Recursive Deconstruction\n");
 		printf(" 0 - Exit\n\n");
 		printf("Option: ");
 		scanf("%d",&op);
@@ -421,7 +515,7 @@ int main()
 				testColor2Gray();
 				break;
 			case 4: {
-				char fname[MAX_PATH];
+				/*char fname[MAX_PATH];
 				if (openFileDlg(fname))
 				{
 					Mat_<Vec3b> src = imread(fname, IMREAD_COLOR);
@@ -435,11 +529,11 @@ int main()
 					else {
 						printf("Invalid file image\n");
 					}
-				}
+				}*/
 				break;
 			}
 			case 5: {
-				char fname[MAX_PATH];
+				/*char fname[MAX_PATH];
 				if (openFileDlg(fname))
 				{
 					Mat_<Vec3b> src = imread(fname, IMREAD_COLOR);
@@ -455,7 +549,7 @@ int main()
 					else {
 						printf("Invalid file image\n");
 					}
-				}
+				}*/
 				break;
 			}
 			case 6:{
@@ -470,8 +564,11 @@ int main()
 				break;
 			}
 			case 8: {
-
-				twoDD(1);
+				twoDDeconstructShow();
+				break;
+			}
+			case 9: {
+				twoDDeconstructRecursiveShow();
 				break;
 			}
 		
