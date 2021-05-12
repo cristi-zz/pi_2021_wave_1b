@@ -93,12 +93,13 @@ void oneDConstruction(std::vector<int> input) {
 		printf("%d ", input[i]);
 	printf("\n");
 
+
 	for (int i = 0; i < input.size()/2; i++)
 		printf("%d ", vector_low[i]);
 
 	for (int i = 0; i < input.size() / 2; i++)
 		printf("%d ", vector_high[i]);
-
+	system("pause");
 }
 
 std::vector<int> computeHighUpSample(std::vector<int> input) {
@@ -150,6 +151,7 @@ void oneDDeconstruction(std::vector<int> vector_low, std::vector<int> vector_hig
 
 	for (int i = 0; i < upsample_signal.size(); i++)
 		printf("%d ", upsample_signal[i]);
+	system("pause");
 }
 
 Mat_<Vec3b> twoDConstruction(Mat_<Vec3b> src, int level) {
@@ -388,7 +390,6 @@ void twoDD(int level) {
 	waitKey(0);
 }
 
-
 int main()
 {
 	int op;
@@ -473,6 +474,7 @@ int main()
 				twoDD(1);
 				break;
 			}
+		
 		}
 	}
 	while (op!=0);
