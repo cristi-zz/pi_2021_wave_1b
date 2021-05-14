@@ -417,11 +417,12 @@ std::vector<Mat_<int>> twoDDeconstructRecursive(Mat_<int> src, int level) {
 		startingImg = dstLL.clone();
 		level--;
 	}
+	dest.push_back(startingImg);
 
 	return dest;
 }
 
-void twoDDeconstructRecursiveShow() {
+std::vector<Mat_<int>> twoDDeconstructRecursiveShow() {
 
 	char fname[MAX_PATH];
 	if (openFileDlg(fname)) {
@@ -459,8 +460,127 @@ void twoDDeconstructRecursiveShow() {
 		resizeWindow("LL", height, width);
 
 		waitKey(0);
+		return dest;
+	}
+	
+}
+
+
+//************ 2D Consttruction Recursive
+
+
+void computeLowHigh(Mat_<int> imgLL, Mat_<int> imgLH, Mat_<int> imgHL, Mat_<int> imgHH, Mat_<int>& dstL, Mat_<int>& dstH) {
+
+	// we compute the lowImage and highImage from the images LL,LH,HL,HH
+	int heightLL = imgLL.rows;
+
+	for (int i = 0; i < heightLL; i++) {
+
+		std::vector<int> vector_lowL(heightLL);
+		std::vector<int> vector_highL(heightLL);
+		std::vector<int> vector_lowH(heightLL);
+		std::vector<int> vector_highH(heightLL);
+
+		for (int j = 0; j < heightLL; j++) {
+			vector_lowL.at(j) = imgLL(j, i);
+			vector_highL.at(j) = imgLH(j, i) - 128;
+			vector_lowH.at(j) = imgHL(j, i);
+			vector_highH.at(j) = imgHH(j, i) - 128;
+		}
+
+		std::vector<int> low_upSample = computeLowUpSample(vector_lowL);
+		std::vector<int> high_upSample = computeHighUpSample(vector_highL);
+		std::vector<int> upsample_signalL(low_upSample.size());
+
+		for (int j = 0; j < upsample_signalL.size(); j++)
+			upsample_signalL[j] = high_upSample[j] + low_upSample[j];
+
+		for (int j = 0; j < heightLL * 2; j++) {
+			dstL(j, i) = upsample_signalL.at(j);
+		}
+
+
+		low_upSample = computeLowUpSample(vector_lowH);
+		high_upSample = computeHighUpSample(vector_highH);
+		std::vector<int> upsample_signalH(low_upSample.size());
+
+		for (int j = 0; j < upsample_signalL.size(); j++)
+			upsample_signalH[j] = high_upSample[j] + low_upSample[j];
+
+		for (int j = 0; j < heightLL * 2; j++) {
+			dstH(j, i) = upsample_signalH.at(j);
+		}
+
+	}
+
+}
+
+void computeImageFromLowHigh(int height, int width, Mat_<int> dstL, Mat_<int> dstH, Mat_<int>& dstInterm) {
+
+	// we compute the image from the lowImage and highImage
+
+	for (int i = 0; i < height; i++) {
+		std::vector<int> vector_lowL(height * 2);
+		std::vector<int> vector_highL(height * 2);
+		
+		for (int j = 0; j < height/2; j++) {
+			
+			vector_lowL.at(j) = dstL(i, j);
+			vector_highL.at(j) = dstH(i, j) - 128;
+		}
+		
+		std::vector<int> low_upSample = computeLowUpSample(vector_lowL);
+		std::vector<int> high_upSample = computeHighUpSample(vector_highL);
+		std::vector<int> upsample_signalL(low_upSample.size());
+		for (int j = 0; j < upsample_signalL.size(); j++)
+			upsample_signalL[j] = high_upSample[j] + low_upSample[j];
+		for (int j = 0; j < width; j++) {
+			dstInterm(i, j) = upsample_signalL.at(j);
+		}
+
 	}
 }
+
+Mat_<int> twoDConstructRecursive(std::vector<Mat_<int>> images) {
+
+	int i = images.size();
+	Mat_<int> imgLL = images[--i];
+	//Mat_<int> srcFinal();
+
+	while (i / 3) {
+
+		int heightLL = imgLL.rows;
+		int widthLL = imgLL.cols;
+
+		Mat_<int> imgHL = images[--i];
+		Mat_<int> imgLH = images[--i];
+		Mat_<int> imgHH = images[--i];
+
+		Mat_<int> dstInterm(heightLL * 2, widthLL * 2);
+
+		Mat_<int> dstH(heightLL * 2, widthLL);
+		Mat_<int> dstL(heightLL * 2, widthLL);
+		int height = heightLL * 2;
+		int width = widthLL * 2;
+		computeLowHigh(imgLL, imgLH, imgHL, imgHH, dstL, dstH);
+
+		computeImageFromLowHigh(height, width, dstL, dstH, dstInterm);
+
+		imgLL = dstInterm.clone();
+	}
+
+	Mat_<int> dstFinal = imgLL.clone();
+	return dstFinal;
+
+}
+
+void twoDConstructRecursiveShow(std::vector<Mat_<int>> images) {
+
+	Mat_<int> dst = twoDConstructRecursive(images);
+	imshow("Img Construct", (Mat_<uchar>) dst);
+	waitKey(0);
+}
+
 //************ MAE
 
 float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
@@ -490,7 +610,7 @@ int main()
 		printf(" 6 - 1D Construction\n");
 		printf(" 7 - 1D Deconstruction\n");
 		printf(" 8 - 2D Deconstruction\n");
-		printf(" 9 - 2D Recursive Deconstruction\n");
+		printf(" 9 - 2D Recursive Deconstruction & Construction\n");
 		printf(" 0 - Exit\n\n");
 		printf("Option: ");
 		scanf("%d",&op);
@@ -559,9 +679,11 @@ int main()
 				break;
 			}
 			case 9: {
-				twoDDeconstructRecursiveShow();
+				std::vector<Mat_<int>> dest = twoDDeconstructRecursiveShow();
+				twoDConstructRecursiveShow(dest);
 				break;
 			}
+		
 		
 		}
 	}
