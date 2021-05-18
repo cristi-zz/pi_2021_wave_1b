@@ -422,7 +422,7 @@ std::vector<Mat_<int>> twoDDeconstructRecursive(Mat_<int> src, int level) {
 	return dest;
 }
 
-std::vector<Mat_<int>> twoDDeconstructRecursiveShow() {
+void twoDDeconstructRecursiveShow() {
 
 	char fname[MAX_PATH];
 	if (openFileDlg(fname)) {
@@ -458,15 +458,25 @@ std::vector<Mat_<int>> twoDDeconstructRecursiveShow() {
 
 		imshow("LL", (Mat_<uchar>) dest[dest.size()-1]);
 		resizeWindow("LL", height, width);
-
+	
 		waitKey(0);
-		return dest;
 	}
 	
 }
+//************ MAE
+
+float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
+	float mean = 0.0f;
+
+	for (int i = 0; i < originalImg.rows; i++)
+		for (int j = 0; j < originalImg.cols; j++)
+			mean += abs(originalImg(i, j) - reconstructedImg(i, j));
 
 
-//************ 2D Consttruction Recursive
+	return (float)mean / (originalImg.rows * originalImg.cols);
+}
+
+//************ 2D Construction Recursive
 
 
 void computeLowHigh(Mat_<int> imgLL, Mat_<int> imgLH, Mat_<int> imgHL, Mat_<int> imgHH, Mat_<int>& dstL, Mat_<int>& dstH) {
@@ -574,24 +584,66 @@ Mat_<int> twoDConstructRecursive(std::vector<Mat_<int>> images) {
 
 }
 
-void twoDConstructRecursiveShow(std::vector<Mat_<int>> images) {
+Mat_<int> scaling(Mat_<int> originalImg, Mat_<int> reconstructedImg) {
 
-	Mat_<int> dst = twoDConstructRecursive(images);
-	imshow("Img Construct", (Mat_<uchar>) dst);
-	waitKey(0);
+	Mat_<int> difference(originalImg.rows, originalImg.cols, 0);
+	for (int i=0; i<originalImg.rows; i++)
+		for (int j = 0; j < originalImg.cols; j++)
+			if (reconstructedImg(i, j) != originalImg(i, j)) {
+				difference(i, j) = (originalImg(i, j) - reconstructedImg(i, j)) * 10;
+			}
+
+	return difference;
 }
 
-//************ MAE
+void twoDConstructRecursiveShow() {
 
-float meanAbsoluteError(Mat_<uchar> originalImg, Mat_<uchar> reconstructedImg) {
-	float mean = 0.0f;
+	char fname[MAX_PATH];
+	if (openFileDlg(fname)) {
+		Mat_<int> src = imread(fname, IMREAD_GRAYSCALE);
+		int height = src.rows;
+		int width = src.cols;
 
-	for (int i = 0; i < originalImg.rows; i++)
-		for (int j = 0; j < originalImg.cols; j++)
-			mean += abs(originalImg(i, j) - reconstructedImg(i, j));
+		int level = 0;
+		printf("Level=");
+		scanf("%d", &level);
 
+		imshow("src", (Mat_<uchar>) src);
 
-	return (float)mean / (originalImg.rows * originalImg.cols);
+		std::vector<Mat_<int>> dest = twoDDeconstructRecursive(src, level);
+
+		level = 1;
+		for (int i = 0; i < dest.size() - 1; i += 3) {
+
+			String hh = "HH" + std::to_string(level);
+			imshow(hh, (Mat_<uchar>) dest[i]);
+			resizeWindow(hh, height, width);
+
+			String hl = "HL" + std::to_string(level);
+			imshow(hl, (Mat_<uchar>) dest[i + 1]);
+			resizeWindow(hl, height, width);
+
+			String lh = "LH" + std::to_string(level);
+			imshow(lh, (Mat_<uchar>) dest[i + 2]);
+			resizeWindow(lh, height, width);
+
+			level++;
+		}
+
+		imshow("LL", (Mat_<uchar>) dest[dest.size() - 1]);
+		resizeWindow("LL", height, width);
+
+		Mat_<int> dst = twoDConstructRecursive(dest);
+		imshow("Img Construct", (Mat_<uchar>) dst);
+
+		float mae = meanAbsoluteError(src, dst);
+		printf("mae=%f", mae);
+
+		Mat_<int> diff =scaling(src, dst);
+		imshow("Difference", (Mat_<uchar>) diff);
+		
+		waitKey(0);
+	}
 }
 
 int main()
@@ -610,7 +662,8 @@ int main()
 		printf(" 6 - 1D Construction\n");
 		printf(" 7 - 1D Deconstruction\n");
 		printf(" 8 - 2D Deconstruction\n");
-		printf(" 9 - 2D Recursive Deconstruction & Construction\n");
+		printf(" 9 - 2D Recursive Deconstruction\n");
+		printf(" 10 - 2D Recursive Construction\n");
 		printf(" 0 - Exit\n\n");
 		printf("Option: ");
 		scanf("%d",&op);
@@ -679,11 +732,13 @@ int main()
 				break;
 			}
 			case 9: {
-				std::vector<Mat_<int>> dest = twoDDeconstructRecursiveShow();
-				twoDConstructRecursiveShow(dest);
+				twoDDeconstructRecursiveShow();
 				break;
 			}
-		
+			case 10: {
+				twoDConstructRecursiveShow();
+				break;
+			}
 		
 		}
 	}
