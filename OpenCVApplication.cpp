@@ -646,6 +646,74 @@ void twoDConstructRecursiveShow() {
 	}
 }
 
+Mat_<int> filter(Mat_<int> mat, int threshold) {
+	Mat_<int> result = mat.clone();
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			if (result(i, j) < threshold) {
+				result(i, j) = 0;
+			}
+		}
+	}
+	return result;
+}
+
+void twoDConstructRecursiveThresholdShow() {
+
+	char fname[MAX_PATH];
+	if (openFileDlg(fname)) {
+		Mat_<int> src = imread(fname, IMREAD_GRAYSCALE);
+		int height = src.rows;
+		int width = src.cols;
+
+		int level = 0;
+		printf("Level=");
+		scanf("%d", &level);
+		int threshold = 0;
+		printf("Threshold=");
+		scanf("%d", &threshold);
+
+		imshow("src", (Mat_<uchar>) src);
+
+		std::vector<Mat_<int>> dest = twoDDeconstructRecursive(src, level);
+
+		level = 1;
+		for (int i = 0; i < dest.size() - 1; i += 3) {
+
+			String hh = "HH" + std::to_string(level);
+			imshow(hh, (Mat_<uchar>) dest[i]);
+			resizeWindow(hh, height, width);
+			dest[i] = filter(dest[i], threshold);
+
+			String hl = "HL" + std::to_string(level);
+			imshow(hl, (Mat_<uchar>) dest[i + 1]);
+			resizeWindow(hl, height, width);
+			dest[i + 1] = filter(dest[i + 1], threshold);
+
+			String lh = "LH" + std::to_string(level);
+			imshow(lh, (Mat_<uchar>) dest[i + 2]);
+			resizeWindow(lh, height, width);
+			dest[i + 2] = filter(dest[i + 2], threshold);
+
+			level++;
+		}
+
+		imshow("LL", (Mat_<uchar>) dest[dest.size() - 1]);
+		resizeWindow("LL", height, width);
+
+		Mat_<int> dst = twoDConstructRecursive(dest);
+		imshow("Img Construct", (Mat_<uchar>) dst);
+
+		float mae = meanAbsoluteError(src, dst);
+		printf("mae=%f", mae);
+
+		Mat_<int> diff = scaling(src, dst);
+		imshow("Difference", (Mat_<uchar>) diff);
+
+		waitKey(0);
+	}
+}
+
 int main()
 {
 	int op;
@@ -664,6 +732,7 @@ int main()
 		printf(" 8 - 2D Deconstruction\n");
 		printf(" 9 - 2D Recursive Deconstruction\n");
 		printf(" 10 - 2D Recursive Construction\n");
+		printf(" 11 - 2D Recursive Construction with Threshold\n");
 		printf(" 0 - Exit\n\n");
 		printf("Option: ");
 		scanf("%d",&op);
@@ -739,7 +808,10 @@ int main()
 				twoDConstructRecursiveShow();
 				break;
 			}
-		
+			case 11: {
+				twoDConstructRecursiveThresholdShow();
+				break;
+			}
 		}
 	}
 	while (op!=0);
