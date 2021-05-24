@@ -221,6 +221,23 @@ Mat_<Vec3b> twoDDeconstruction(Mat_<Vec3b> src, int level) {
 
 //************ 2D Decosntruction
 
+Mat_<int> toImg(Mat_<int> src, int flag) {
+	Mat_<int> dst(src.rows, src.cols);
+	int aux;
+	for (int i = 0; i < src.rows; i++) {
+		for (int j = 0; j < src.cols; j++) {
+			if (flag == 1) {
+				uchar temp = src(i, j) + 128;
+				dst(i, j) = temp;
+			}
+			else {
+
+				dst(i, j) = src(i, j);
+			}
+		}
+	}
+	return dst;
+}
 Mat_<int> imageLL(Mat_<int> dstLow) {
 
 	//LL
@@ -362,12 +379,14 @@ void twoDDeconstructShow() {
 
 		//lowImage
 		dstLow = imageLow(src);
-		imshow("L", (Mat_<uchar>) dstLow);
+		Mat_<int> dstLowImg = toImg(dstLow, 0);
+		imshow("L", (Mat_<uchar>) dstLowImg);
 		resizeWindow("L", src.rows, src.cols);
 
 		//highImage
 		dstHigh = imageHigh(src);
-		imshow("H", (Mat_<uchar>) dstHigh);
+		Mat_<int> dstHighImg = toImg(dstHigh, 1);
+		imshow("H", (Mat_<uchar>) dstHighImg);
 		resizeWindow("H", src.rows, src.cols);
 
 
@@ -378,16 +397,20 @@ void twoDDeconstructShow() {
 
 		twoDDeconstruct(src, dstLL, dstLH, dstHL, dstHH);
 
-		imshow("LL", (Mat_<uchar>) dstLL);
+		Mat_<int> dstLLImg = toImg(dstLL, 1);
+		imshow("LL", (Mat_<uchar>) dstLLImg);
 		resizeWindow("LL", height, width);
 
-		imshow("LH", (Mat_<uchar>) dstLH);
+		Mat_<int> dstLHImg = toImg(dstLH, 1);
+		imshow("LH", (Mat_<uchar>) dstLHImg);
 		resizeWindow("LH", height, width);
 
-		imshow("HL", (Mat_<uchar>) dstHL);
+		Mat_<int> dstHLImg = toImg(dstHL, 1);
+		imshow("HL", (Mat_<uchar>) dstHLImg);
 		resizeWindow("HL", height, width);
 
-		imshow("HH", (Mat_<uchar>) dstHH);
+		Mat_<int> dstHHImg = toImg(dstHH, 1);
+		imshow("HH", (Mat_<uchar>) dstHHImg);
 		resizeWindow("HH", height, width);
 
 		waitKey(0);
@@ -441,16 +464,21 @@ void twoDDeconstructRecursiveShow() {
 		level = 1;
 		for (int i = 0; i < dest.size()-1; i+=3) {
 			
+			Mat_<int> destImg(dest[i].rows, dest[i].cols);
+
+			destImg = toImg(dest[i], 1);
 			String hh = "HH" + std::to_string(level);
-			imshow(hh, (Mat_<uchar>) dest[i]);
+			imshow(hh, (Mat_<uchar>) destImg);
 			resizeWindow(hh, height, width);
 
+			destImg = toImg(dest[i]+1, 1);
 			String hl = "HL" + std::to_string(level);
-			imshow(hl, (Mat_<uchar>) dest[i + 1]);
+			imshow(hl, (Mat_<uchar>) destImg);
 			resizeWindow(hl, height, width);
 
+			destImg = toImg(dest[i]+2, 1);
 			String lh = "LH" + std::to_string(level);
-			imshow(lh, (Mat_<uchar>) dest[i + 2]);
+			imshow(lh, (Mat_<uchar>) destImg);
 			resizeWindow(lh, height, width);
 
 			level++;
@@ -615,16 +643,21 @@ void twoDConstructRecursiveShow() {
 		level = 1;
 		for (int i = 0; i < dest.size() - 1; i += 3) {
 
+			Mat_<int> destImg(dest[i].rows, dest[i].cols);
+
+			destImg = toImg(dest[i], 1);
 			String hh = "HH" + std::to_string(level);
-			imshow(hh, (Mat_<uchar>) dest[i]);
+			imshow(hh, (Mat_<uchar>) destImg);
 			resizeWindow(hh, height, width);
 
+			destImg = toImg(dest[i] + 1, 1);
 			String hl = "HL" + std::to_string(level);
-			imshow(hl, (Mat_<uchar>) dest[i + 1]);
+			imshow(hl, (Mat_<uchar>) destImg);
 			resizeWindow(hl, height, width);
 
+			destImg = toImg(dest[i] + 2, 1);
 			String lh = "LH" + std::to_string(level);
-			imshow(lh, (Mat_<uchar>) dest[i + 2]);
+			imshow(lh, (Mat_<uchar>) destImg);
 			resizeWindow(lh, height, width);
 
 			level++;
@@ -693,7 +726,7 @@ void twoDConstructRecursiveThresholdShow() {
 			String lh = "LH" + std::to_string(level);
 			imshow(lh, (Mat_<uchar>) dest[i + 2]);
 			resizeWindow(lh, height, width);
-			dest[i + 2] = filter(dest[i + 2], threshold);
+			dest[i + 2] =filter(dest[i + 2], threshold);
 
 			level++;
 		}
